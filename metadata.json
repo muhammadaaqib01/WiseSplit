@@ -1,0 +1,6 @@
+{
+  "name": "WiseSpend Family Tracker",
+  "description": "A modern, personal finance application for families to track income, expenses, and manage shared budgets with Excel import and PDF reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

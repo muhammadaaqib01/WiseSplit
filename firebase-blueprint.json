@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A financial transaction representing money received or spent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["received", "spent"] },
+        "amount": { "type": "number" },
+        "description": { "type": "string" },
+        "paid_to": { "type": "string" },
+        "month": { "type": "string", "description": "YYYY-MM format for easy filtering" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "type", "amount", "description", "userId", "month"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stored user preferences and basic info.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "darkMode": { "type": "boolean" }
+          }
+        }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "transactions": {
+      "schema": "Transaction",
+      "description": "Collection of all family transactions."
+    },
+    "users": {
+      "schema": "UserProfile",
+      "description": "User profile data."
+    }
+  }
+}
