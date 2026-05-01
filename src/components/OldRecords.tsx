@@ -227,17 +227,17 @@ export default function OldRecords({ user }: OldRecordsProps) {
                     <span>{formatFileSize(record.fileSize)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => downloadFile(record)}
-                    className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 rounded-lg transition-colors"
+                    className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg transition-colors bg-blue-50 dark:bg-blue-900/20"
                     title="Download"
                   >
                     <Download className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => deleteRecord(record.id, record.fileName)}
-                    className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 rounded-lg transition-colors"
+                    className="p-2 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400 rounded-lg transition-colors bg-red-50 dark:bg-red-900/20"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
