@@ -39,6 +39,8 @@ import ImportData from './components/ImportData';
 import ProfileView from './components/ProfileView';
 import OldRecords from './components/OldRecords';
 
+import Logo from './components/Logo';
+
 type View = 'dashboard' | 'add' | 'history' | 'reports' | 'import' | 'profile' | 'old_records';
 
 function AuthScreen() {
@@ -95,9 +97,7 @@ function AuthScreen() {
         className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl shadow-xl p-8 border border-slate-200 dark:border-slate-800"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Wallet className="w-8 h-8 text-blue-600" />
-          </div>
+          <Logo size="lg" className="mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white">WiseSpend</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2">
             {isSignUp ? 'Create your family account' : 'Welcome back to WiseSpend'}
@@ -283,9 +283,7 @@ export default function App() {
       )}>
         <div className="flex flex-col h-full p-6">
           <div className="flex items-center gap-3 mb-10 px-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none">
-              <Wallet className="w-6 h-6 text-white" />
-            </div>
+            <Logo size="md" />
             <span className="text-xl font-bold tracking-tight">WiseSpend</span>
           </div>
 
