@@ -40,6 +40,35 @@ service cloud.firestore {
     }
 
     // Transactions Rules
+    // User Profile Validation
+    function isValidUser(data) {
+      return data.updatedAt is timestamp &&
+             (!data.keys().contains('displayName') || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!data.keys().contains('photoURL') || (data.photoURL is string && data.photoURL.size() <= 900000)); // Enforce <1MB limit
+    }
+
+    // Old Records Validation
+    function isValidRecord(data) {
+      return data.keys().hasAll(['fileName', 'fileSize', 'fileData', 'fileType', 'userId', 'createdAt']) &&
+             data.fileName is string && data.fileName.size() <= 255 &&
+             data.fileSize is number && data.fileSize <= 1000000 &&
+             data.fileData is string && data.fileData.size() <= 1000000 &&
+             data.fileType is string && data.fileType.size() <= 255 &&
+             data.userId == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
+    }
+
+    match /old_records/{recordId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidRecord(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
     match /transactions/{transactionId} {
       allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
       allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
@@ -53,21 +82,10 @@ service cloud.firestore {
                     isValidTransaction(incoming()) &&
                     incoming().userId == existing().userId &&
                     (
-                      incoming().diff(existing()).affectedKeys().hasOnly(['date', 'type', 'amount', 'description', 'paid_to', 'month', 'updatedAt'])
+                      incoming().diff(existing()).affectedKeys().hasOnly(['date', 'type', 'amount', 'description', 'month', 'updatedAt'])
                     );
 
       allow delete: if isSignedIn() && existing().userId == request.auth.uid;
-    }
-
-    // User Profile Rules
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow create: if isOwner(userId) && 
-                    incoming().uid == userId &&
-                    incoming().email is string;
-      allow update: if isOwner(userId) &&
-                    incoming().uid == userId &&
-                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'settings']);
     }
   }
 }

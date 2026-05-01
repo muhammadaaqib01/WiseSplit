@@ -3,6 +3,7 @@ import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Transaction, MonthlySummary } from '../types';
 import { formatCurrency, cn } from '../lib/utils';
+import { format } from 'date-fns';
 import { User } from 'firebase/auth';
 import { 
   Download, 
@@ -11,7 +12,9 @@ import {
   TrendingDown, 
   Calculator,
   Calendar,
-  ChevronRight
+  ChevronRight,
+  PieChart as PieChartIcon,
+  Table as TableIcon
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -20,9 +23,16 @@ interface ReportsViewProps {
   user: User;
 }
 
+interface CategorySummary {
+  category: string;
+  amount: number;
+  percentage: number;
+}
+
 export default function ReportsView({ user }: ReportsViewProps) {
   const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reportTransactions, setReportTransactions] = useState<Transaction[]>([]);
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,15 +48,19 @@ export default function ReportsView({ user }: ReportsViewProps) {
       );
       const querySnapshot = await getDocs(q);
       const transactions = querySnapshot.docs.map(doc => doc.data() as Transaction);
+      setReportTransactions(transactions);
       
       const summariesMap: Record<string, MonthlySummary> = {};
       
       transactions.forEach(t => {
+        // Monthly Summary
         if (!summariesMap[t.month]) {
           summariesMap[t.month] = { month: t.month, received: 0, spent: 0, balance: 0 };
         }
         if (t.type === 'received') summariesMap[t.month].received += t.amount;
-        else summariesMap[t.month].spent += t.amount;
+        else {
+          summariesMap[t.month].spent += t.amount;
+        }
         summariesMap[t.month].balance = summariesMap[t.month].received - summariesMap[t.month].spent;
       });
 
@@ -58,6 +72,42 @@ export default function ReportsView({ user }: ReportsViewProps) {
     }
   };
 
+  const exportCSV = () => {
+    if (reportTransactions.length === 0) return;
+    
+    const headers = ['Date', 'Type', 'Description', 'Amount'];
+    
+    // Helper to escape CSV values correctly
+    const escapeCSV = (val: any) => {
+      const stringVal = String(val);
+      if (stringVal.includes(',') || stringVal.includes('"') || stringVal.includes('\n')) {
+        return `"${stringVal.replace(/"/g, '""')}"`;
+      }
+      return stringVal;
+    };
+
+    const rows = reportTransactions.map(t => [
+      escapeCSV(t.date),
+      escapeCSV(t.type),
+      escapeCSV(t.description),
+      escapeCSV(t.amount)
+    ]);
+
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    // Add BOM for Excel compatibility
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `financial_export_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.click();
+  };
+
   const exportPDF = async () => {
     if (!reportRef.current) return;
     
@@ -66,6 +116,7 @@ export default function ReportsView({ user }: ReportsViewProps) {
     if (isDark) document.documentElement.classList.remove('dark');
 
     try {
+      setLoading(true);
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,
@@ -80,29 +131,41 @@ export default function ReportsView({ user }: ReportsViewProps) {
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Financial_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+      pdf.save(`Family_Finance_Report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     } catch (error) {
       console.error('PDF Export failed', error);
+      alert('PDF Export failed. Please try again.');
     } finally {
       if (isDark) document.documentElement.classList.add('dark');
+      setLoading(false);
     }
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">Financial Reports</h1>
-        <button
-          onClick={exportPDF}
-          disabled={loading || monthlySummaries.length === 0}
-          className="bg-slate-900 border border-slate-700 dark:bg-white dark:text-slate-900 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
-        >
-          <Download className="w-4 h-4" />
-          Export to PDF
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={exportCSV}
+            disabled={loading || reportTransactions.length === 0}
+            className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-50"
+          >
+            <TableIcon className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={exportPDF}
+            disabled={loading || monthlySummaries.length === 0}
+            className="flex-1 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50 shadow-lg shadow-blue-200 dark:shadow-none"
+          >
+            <Download className="w-4 h-4" />
+            Export PDF
+          </button>
+        </div>
       </div>
 
-      <div ref={reportRef} className="space-y-8 bg-transparent">
+      <div ref={reportRef} id="report-container" className="space-y-10 pt-4 bg-white dark:bg-slate-900 p-8 rounded-3xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             [1,2,3].map(i => <div key={i} className="h-48 bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse"></div>)
@@ -164,9 +227,9 @@ export default function ReportsView({ user }: ReportsViewProps) {
                 </p>
               </div>
               <div>
-                <p className="text-blue-100 text-sm font-medium mb-1">Total Savings Rate</p>
+                <p className="text-blue-100 text-sm font-medium mb-1">Balance</p>
                 <p className="text-3xl font-extrabold">
-                  {Math.round((monthlySummaries.reduce((a, b) => a + b.balance, 0) / monthlySummaries.reduce((a, b) => a + b.received, 0)) * 100)}%
+                  {formatCurrency(monthlySummaries.reduce((a, b) => a + b.balance, 0))}
                 </p>
               </div>
             </div>

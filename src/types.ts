@@ -6,7 +6,6 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   description: string;
-  paid_to?: string;
   month: string; // YYYY-MM
   userId: string;
   createdAt?: any;

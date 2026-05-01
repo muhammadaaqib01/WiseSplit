@@ -24,7 +24,6 @@ interface PreviewItem {
   type: 'received' | 'spent';
   amount: number;
   description: string;
-  paid_to?: string;
   isValid: boolean;
 }
 
@@ -53,7 +52,6 @@ export default function ImportData({ user, onComplete }: ImportDataProps) {
           const type = (row.Type || row.type || row.TYPE || '').toLowerCase();
           const amount = parseFloat(row.Amount || row.amount || row.AMOUNT || '0');
           const description = row.Description || row.description || row.DESCRIPTION || '';
-          const paid_to = row.PaidTo || row.paid_to || row.PAID_TO || row.Vendor || '';
 
           let formattedDate = '';
           try {
@@ -71,7 +69,6 @@ export default function ImportData({ user, onComplete }: ImportDataProps) {
             type: type === 'received' || type === 'income' ? 'received' : 'spent',
             amount: Math.abs(amount),
             description: String(description),
-            paid_to: String(paid_to),
             isValid: formattedDate !== 'Invalid Date' && amount > 0 && description.length > 0
           };
         });

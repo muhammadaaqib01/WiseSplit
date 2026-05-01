@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number) {
+export function formatCurrency(amount: number, showSign: boolean = false) {
   const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
   const formattedNumber = new Intl.NumberFormat('en-PK', {
@@ -14,7 +14,8 @@ export function formatCurrency(amount: number) {
     maximumFractionDigits: 0
   }).format(absAmount);
   
-  return `Rs ${isNegative ? '-' : ''}${formattedNumber}`;
+  const sign = showSign ? (isNegative ? '-' : '+') : (isNegative ? '-' : '');
+  return `Rs ${sign}${formattedNumber}`;
 }
 
 export function formatDate(dateString: string) {

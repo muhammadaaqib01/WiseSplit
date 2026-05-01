@@ -10,7 +10,6 @@
         "type": { "type": "string", "enum": ["received", "spent"] },
         "amount": { "type": "number" },
         "description": { "type": "string" },
-        "paid_to": { "type": "string" },
         "month": { "type": "string", "description": "YYYY-MM format for easy filtering" },
         "userId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
@@ -26,6 +25,7 @@
         "uid": { "type": "string" },
         "email": { "type": "string" },
         "displayName": { "type": "string" },
+        "photoURL": { "type": "string", "description": "Base64 encoded profile image" },
         "settings": {
           "type": "object",
           "properties": {
@@ -33,7 +33,22 @@
           }
         }
       },
-      "required": ["uid", "email"]
+      "required": ["uid"]
+    },
+    "OldRecord": {
+      "title": "Old Record",
+      "description": "An archived Excel or CSV file stored as Base64.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileSize": { "type": "number" },
+        "fileData": { "type": "string", "description": "Base64 encoded file content" },
+        "fileType": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fileName", "fileSize", "fileData", "userId"]
     }
   },
   "firestore": {
@@ -44,6 +59,10 @@
     "users": {
       "schema": "UserProfile",
       "description": "User profile data."
+    },
+    "old_records": {
+      "schema": "OldRecord",
+      "description": "Archived Excel files."
     }
   }
 }

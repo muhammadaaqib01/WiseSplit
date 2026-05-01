@@ -233,7 +233,7 @@ export default function Dashboard({ user, onNavigate }: DashboardProps) {
                       "text-sm font-bold",
                       t.type === 'received' ? "text-green-600" : "text-red-600"
                     )}>
-                      {t.type === 'received' ? '+' : '-'}{formatCurrency(t.amount)}
+                      {formatCurrency(t.type === 'received' ? t.amount : -t.amount, true)}
                     </p>
                     <p className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">{t.paid_to || 'N/A'}</p>
                   </div>

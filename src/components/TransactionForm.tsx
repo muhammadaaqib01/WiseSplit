@@ -15,8 +15,7 @@ export default function TransactionForm({ user, onComplete }: TransactionFormPro
     date: format(new Date(), 'yyyy-MM-dd'),
     type: 'spent',
     amount: '',
-    description: '',
-    paid_to: ''
+    description: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -121,17 +120,6 @@ export default function TransactionForm({ user, onComplete }: TransactionFormPro
                   className="w-full pl-12 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paid To / From</label>
-              <input
-                type="text"
-                placeholder="Vendor or Person"
-                value={formData.paid_to}
-                onChange={(e) => setFormData({ ...formData, paid_to: e.target.value })}
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all"
-              />
             </div>
           </div>
 

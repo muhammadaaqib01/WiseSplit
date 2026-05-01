@@ -82,8 +82,7 @@ export default function HistoryView({ user }: HistoryViewProps) {
   };
 
   const filteredTransactions = transactions.filter(t => {
-    const searchMatch = t.description.toLowerCase().includes(search.toLowerCase()) || 
-                       (t.paid_to || '').toLowerCase().includes(search.toLowerCase());
+    const searchMatch = t.description.toLowerCase().includes(search.toLowerCase());
     const monthMatch = monthFilter ? t.month === monthFilter : true;
     return searchMatch && monthMatch;
   });
@@ -192,7 +191,6 @@ export default function HistoryView({ user }: HistoryViewProps) {
                         <td className="px-6 py-4 text-sm whitespace-nowrap">{t.date}</td>
                         <td className="px-6 py-4">
                           <div className="font-medium">{t.description}</div>
-                          {t.paid_to && <div className="text-xs text-slate-400 font-medium uppercase tracking-tight">{t.paid_to}</div>}
                         </td>
                         <td className="px-6 py-4">
                           <span className={cn(
@@ -207,7 +205,7 @@ export default function HistoryView({ user }: HistoryViewProps) {
                             "font-bold",
                             t.type === 'received' ? "text-green-600" : "text-red-600"
                           )}>
-                            {t.type === 'received' ? '+' : '-'}{formatCurrency(t.amount)}
+                            {formatCurrency(t.type === 'received' ? t.amount : -t.amount, true)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
